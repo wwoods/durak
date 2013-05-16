@@ -6,10 +6,12 @@ class GameTable extends Backbone.View
   className: 'game-table'
 
   initialize: () ->
+    playingCards.card.defaults =
+        imgPrefix: "src/lib/jsPlayingCards/"
     @render()
 
 
   render: () ->
     el = @$el
-    @deck = el.playingCards(imgPrefix: "src/lib/jsPlayingCards/")
+    @deck = el.playingCards()
     @deck.spread()
