@@ -1,5 +1,6 @@
 
 require css!./gameTable
+require ./card for Card
 
 class GameTable extends Backbone.View
   tagName: 'div'
@@ -14,4 +15,5 @@ class GameTable extends Backbone.View
   render: () ->
     el = @$el
     @deck = el.playingCards()
-    @deck.spread()
+    for c in @deck.cards
+      el.append(new Card(model: c).el)

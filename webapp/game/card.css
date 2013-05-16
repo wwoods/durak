@@ -1,0 +1,13 @@
+
+.card {
+  display: inline-block;
+  position: relative;
+  margin-left: -3em;
+  z-index: 0;
+}
+
+
+/* Class from playingCards */
+.playingCard {
+  width: 3.8em !important;
+}
