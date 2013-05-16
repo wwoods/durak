@@ -2,13 +2,19 @@
 .card {
   display: inline-block;
   position: relative;
-  margin-left: -3em;
   z-index: 0;
   cursor: default;
+  font-size: 18pt;
+}
+
+
+.card ~ .card {
+  /* Card width is 3.8 em */
+  margin-left: -3.3em;
 }
 
 
 /* Class from playingCards */
 .playingCard {
-  width: 3.8em !important;
+  font-size: inherit !important;
 }
