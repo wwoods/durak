@@ -3,17 +3,19 @@ require css!./card
 
 class Card extends Backbone.View
   tagName: "div"
-  className: "card"
+  className: "card unselectable"
 
   events:
-      'mouseover': 'cardShowAll'
-      'mouseout': 'cardShowNormal'
+      'mousedown': 'cardShow'
+
 
   initialize: () ->
     @$el.append(@model.getHTML())
 
-  cardShowAll: () ->
-    @$el.css('z-index', '2')
 
-  cardShowNormal: () ->
-    @$el.css('z-index', '')
+  cardShow: () ->
+    @$el.css('z-index', '1')
+    $(document).one 'mouseup', () ->
+      @$el.css('z-index', '')
+    # Cancel the event
+    return false

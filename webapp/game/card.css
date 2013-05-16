@@ -4,6 +4,7 @@
   position: relative;
   margin-left: -3em;
   z-index: 0;
+  cursor: default;
 }
 
 
