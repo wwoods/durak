@@ -11,6 +11,7 @@ class Card extends Backbone.View
 
   initialize: () ->
     @$el.append(@model.getHTML())
+    @$el.addClass('playable')
 
 
   cardShow: () ->

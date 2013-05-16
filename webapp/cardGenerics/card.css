@@ -5,14 +5,17 @@
   z-index: 0;
   cursor: default;
   font-size: 18pt;
+  background-color: transparent;
 }
 
-
-.card ~ .card {
-  /* Card width is 3.8 em */
-  margin-left: -3.3em;
+.card .playingCard {
+  -webkit-transition: 0.3s;
+  transition: 0.3s;
 }
 
+.card.playable:hover .playingCard {
+  top: -1em;
+}
 
 /* Class from playingCards */
 .playingCard {

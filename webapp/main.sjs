@@ -6,8 +6,10 @@ require ./app
 require ./routes for appRouter
 require ./game/gameTable for GameTable
 
+require ./backboneHacks
 
-appRouter.on "route:default", async (actions) ->
+
+appRouter.on "route:default", (actions) ->
   if actions
     $('body').html("Unrecognized: #{ actions }; <a href="#">Start over</a>")
     return
@@ -17,7 +19,7 @@ appRouter.on "route:default", async (actions) ->
   $('body').append(new GameTable().el)
 
 
-$ async () ->
+$ async noerror () ->
   """DOM has loaded; activate backbone routers and be happy!"""
   if typeof localStorage == "undefined"
     $('body').html("You must be using an HTML5-compliant browser with "

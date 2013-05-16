@@ -1,0 +1,22 @@
+
+.cardSpread {
+  position: relative;
+  display: inline-block;
+  margin: 1em;
+}
+
+.cardSpread .dropTarget {
+  position: absolute;
+  left: -1em;
+  top: -1em;
+  right: -1em;
+  bottom: -1em;
+  border: dashed 2px #fff;
+  border-radius: 0.4em;
+  background-color: #ccc;
+}
+
+.cardSpread .card ~ .card {
+  /* Card width is 3.8 em */
+  margin-left: -3.3em;
+}
