@@ -3,21 +3,11 @@ require shared/models for ColorHolder
 require ./views for ColorView
 
 require ./app
-require ./routes for appRouter
+require ./routes/index
 require ./game/gameTable for GameTable
 
 require ./backboneHacks
-
-
-appRouter.on "route:default", (actions) ->
-  if actions
-    $('body').html("Unrecognized: #{ actions }; <a href="#">Start over</a>")
-    return
-
-  $('body').html("LOADED; you are #{ localStorage.userId }")
-
-  $('body').append(new GameTable().el)
-
+require ./socketHacks
 
 $ async noerror () ->
   """DOM has loaded; activate backbone routers and be happy!"""
@@ -28,11 +18,17 @@ $ async noerror () ->
 
   await
     app.socket = io.connect()
-    await data, error = app.socket.once 'ready'
-
-    if not localStorage.userId?
-      await resp, error = app.socket.emit 'newId'
-      localStorage.userId = resp.newId
+    await data = app.socket.emitAsync(
+        'auth'
+        id: localStorage.userId
+        auth: localStorage.userAuth
+    catch e
+      console.log(e)
+      if e.error.indexOf("invalid") != 0
+        throw e
+      await data = app.socket.emitAsync "newId"
+      localStorage.userId = data.id
+      localStorage.userAuth = data.auth
   catch e
     console.log e
     $('body').html("Initialization failed: #{ e and e.message or e }")
