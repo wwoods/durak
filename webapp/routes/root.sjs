@@ -1,7 +1,7 @@
 
 action = (actions) ->
   if actions
-    $('body').html("Unrecognized: #{ actions }; <a href="#">Start over</a>")
+    $('body').html('Unrecognized: #{ actions }; <a href="#">Start over</a>')
     return
 
   $('body').html """

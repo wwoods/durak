@@ -6,9 +6,12 @@
     "start": "seriousjs app.sjs"
   },
   "dependencies": {
+    "backbone": "*",
     "express": ">=3.2.0",
+    "hiredis": "*",
     "jade": "*",
     "node-uuid": "*",
+    "redis": "*",
     "stylus": "*",
     "socket.io": "*",
     "uglify-js": "*"

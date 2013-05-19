@@ -6,8 +6,7 @@ require http
 require path
 require seriousjs
 
-require ./server/routes/
-require ./server/websocket/
+require ./server/main
 
 app = express()
 
@@ -26,12 +25,6 @@ callback = () ->
   # development only
   if 'development' == app.get('env')
     app.use(express.errorHandler())
-
-  routes.populate(app)
-  server = http.createServer(app)
-  websocket.listen(server)
-
-  server.listen app.get('port'), () ->
-    console.log('Express / socket server listening on port ' + app.get('port'))
+  main.run(app)
 
 seriousjs.setupRequireJs(app, express, __dirname + '/webapp', callback)

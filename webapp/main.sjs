@@ -34,4 +34,5 @@ $ async noerror () ->
     $('body').html("Initialization failed: #{ e and e.message or e }")
     throw e
 
+  console.log "Backbone.history.start()"
   Backbone.history.start()
