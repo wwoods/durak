@@ -5,7 +5,7 @@ require ../game/durakGame for DurakGame
 require ../common/redis
 require ../common/uuid
 
-class UserSocket extends Backbone.Events
+class UserSocket uses Backbone.Events
   _USER_EXPIRE: 7 * 24 * 60 * 60
 
   constructor: (@socket) ->
@@ -25,66 +25,65 @@ class UserSocket extends Backbone.Events
         return r
       @socket.on event, realMethod
 
-    for key, method of @
-      if not (key[0] == "_" or not @class.hasOwnProperty(key))
-        j = (method) ->
-          bind(key, -> method.apply(@, arguments))
-          console.log "Bound #{ key }"
-        j(method)
+    for key, method of @events
+      async
+        bind(key, -> method.apply(@, arguments))
+        console.log "Bound #{ key }"
 
 
-  auth: async (auth, callback) ->
-    console.log "auth"
-    authKey = @_getAuthKey(auth.id)
-    await r = redis.hget authKey, "auth"
-    catch e
-      # Is it a connectivity issue?  If so, this will raise an exception.
-      await redis.get "_"
-      throw { error: "invalid" }
+  events:
+      auth: async (auth, callback) ->
+        console.log "auth"
+        authKey = @_getAuthKey(auth.id)
+        await r = redis.hget authKey, "auth"
+        catch e
+          # Is it a connectivity issue?  If so, this will raise an exception.
+          await redis.get "_"
+          throw { error: "invalid" }
 
-    if r == null or r != auth.auth
-      throw { error: "invalid" }
+        if r == null or r != auth.auth
+          throw { error: "invalid" }
 
-    @userId = auth.id
-    await redis.expire(authKey, @class._USER_EXPIRE)
-    return { success: true }
-
-
-  createGame: async (data, callback) ->
-    console.log "createGame"
-    game = new DurakGame()
-    game.addPlayer(@userId)
-    await game.save()
-    @_setGame(game)
-    return { success: true, gameId: game.gameId,
-        state: game.renderPlayer(@userId) }
+        @userId = auth.id
+        await redis.expire(authKey, @class._USER_EXPIRE)
+        return { success: true }
 
 
-  disconnect: async (data, callback) ->
-    @stopListening()
+      createGame: async (data, callback) ->
+        console.log "createGame"
+        game = new DurakGame()
+        game.addPlayer(@userId)
+        await game.save()
+        @_setGame(game)
+        return { success: true, gameId: game.gameId,
+            state: game.renderPlayer(@userId) }
 
 
-  loadGame: async (data, callback) ->
-    console.log "loadGame"
-    game = new DurakGame()
-    await game.load(data.gameId)
-    # Auto adds player if they can join, otherwise renders them as an observer
-    @_setGame(game)
-    return { game: game.renderPlayer(@userId) }
+      disconnect: async (data, callback) ->
+        @stopListening()
 
 
-  newId: async (data, callback) ->
-    console.log "newId"
-    creds =
-        success: true
-        id: uuid.next()
-        auth: uuid.next()
-    authKey = @_getAuthKey(creds.id)
-    await redis.del authKey
-    await redis.hset authKey, "auth", creds.auth
-    await redis.expire authKey, @class._USER_EXPIRE
-    @userId = creds.id
-    return creds
+      loadGame: async (data, callback) ->
+        console.log "loadGame"
+        game = new DurakGame()
+        await game.load(data.gameId)
+        # Auto adds player if they can join, otherwise renders them as an observer
+        @_setGame(game)
+        return { game: game.renderPlayer(@userId) }
+
+
+      newId: async (data, callback) ->
+        console.log "newId"
+        creds =
+            success: true
+            id: uuid.next()
+            auth: uuid.next()
+        authKey = @_getAuthKey(creds.id)
+        await redis.del authKey
+        await redis.hset authKey, "auth", creds.auth
+        await redis.expire authKey, @class._USER_EXPIRE
+        @userId = creds.id
+        return creds
 
 
   _getAuthKey: (id) ->
