@@ -36,8 +36,10 @@ class UserSocket uses Backbone.Events
     authKey = @_getAuthKey(auth.id)
     await r = redis.hget authKey, "auth"
     catch e
-      # Is it a connectivity issue?  If so, this will raise an exception.
+      # Is it a connectivity issue?  If so, this will raise a different
+      # exception.
       await redis.get "_"
+      # Otherwise, raise an invalid auth
       throw { error: "invalid" }
 
     if r == null or r != auth.auth
