@@ -51,9 +51,9 @@ class UserSocket uses Backbone.Events
   createGame: async (data, callback) ->
     console.log "createGame"
     game = new DurakGame()
-    game.addPlayer(@userId)
-    await game.save()
+    await game.addPlayer(@userId)
     @_setGame(game)
+
     return { success: true, gameId: game.gameId,
         state: game.renderPlayer(@) }
 
@@ -67,9 +67,14 @@ class UserSocket uses Backbone.Events
   loadGame: async (data, callback) ->
     console.log "loadGame"
     await game = DurakGame.load(data.gameId)
-    # Auto adds player if they can join, otherwise renders them as an
-    # observer
     @_setGame(game)
+
+    # Add player if they can join, otherwise renders them as an
+    # observer
+    if game.data.state == game.states.INITIAL
+        and @userId not in game.data.players
+      await game.addPlayer(@userId)
+
     return { game: game.renderPlayer(@) }
 
 
@@ -92,8 +97,17 @@ class UserSocket uses Backbone.Events
     return "auth_#{ id }"
 
 
+  _onGameEvent: (event) ->
+    state = @currentGame.renderPlayer(@)
+    @socket.emit "gameEvent", { event: event, state: state }
+
+
   _setGame: (game) ->
+    if game == @currentGame
+      return
+
     if @currentGame?
-      @trigger("leaveGame", @)
       @stopListening(@currentGame)
+      @trigger("leaveGame", @)
     @currentGame = game
+    @listenTo(game, "gameEvent", @@_onGameEvent)
