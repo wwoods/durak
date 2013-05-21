@@ -25,65 +25,66 @@ class UserSocket uses Backbone.Events
         return r
       @socket.on event, realMethod
 
-    for key, method of @events
+    for key in [ 'auth', 'createGame', 'disconnect', 'loadGame', 'newId' ]
       async
-        bind(key, -> method.apply(@, arguments))
+        bind(key, -> @[key].apply(@, arguments))
         console.log "Bound #{ key }"
 
 
-  events:
-      auth: async (auth, callback) ->
-        console.log "auth"
-        authKey = @_getAuthKey(auth.id)
-        await r = redis.hget authKey, "auth"
-        catch e
-          # Is it a connectivity issue?  If so, this will raise an exception.
-          await redis.get "_"
-          throw { error: "invalid" }
+  auth: async (auth, callback) ->
+    console.log "auth"
+    authKey = @_getAuthKey(auth.id)
+    await r = redis.hget authKey, "auth"
+    catch e
+      # Is it a connectivity issue?  If so, this will raise an exception.
+      await redis.get "_"
+      throw { error: "invalid" }
 
-        if r == null or r != auth.auth
-          throw { error: "invalid" }
+    if r == null or r != auth.auth
+      throw { error: "invalid" }
 
-        @userId = auth.id
-        await redis.expire(authKey, @class._USER_EXPIRE)
-        return { success: true }
-
-
-      createGame: async (data, callback) ->
-        console.log "createGame"
-        game = new DurakGame()
-        game.addPlayer(@userId)
-        await game.save()
-        @_setGame(game)
-        return { success: true, gameId: game.gameId,
-            state: game.renderPlayer(@userId) }
+    @userId = auth.id
+    await redis.expire(authKey, @class._USER_EXPIRE)
+    return { success: true }
 
 
-      disconnect: async (data, callback) ->
-        @stopListening()
+  createGame: async (data, callback) ->
+    console.log "createGame"
+    game = new DurakGame()
+    game.addPlayer(@userId)
+    await game.save()
+    @_setGame(game)
+    return { success: true, gameId: game.gameId,
+        state: game.renderPlayer(@) }
 
 
-      loadGame: async (data, callback) ->
-        console.log "loadGame"
-        game = new DurakGame()
-        await game.load(data.gameId)
-        # Auto adds player if they can join, otherwise renders them as an observer
-        @_setGame(game)
-        return { game: game.renderPlayer(@userId) }
+  disconnect: async (data, callback) ->
+    # Trigger in backbone's API
+    @trigger("leaveGame", @)
+    @stopListening()
 
 
-      newId: async (data, callback) ->
-        console.log "newId"
-        creds =
-            success: true
-            id: uuid.next()
-            auth: uuid.next()
-        authKey = @_getAuthKey(creds.id)
-        await redis.del authKey
-        await redis.hset authKey, "auth", creds.auth
-        await redis.expire authKey, @class._USER_EXPIRE
-        @userId = creds.id
-        return creds
+  loadGame: async (data, callback) ->
+    console.log "loadGame"
+    await game = DurakGame.load(data.gameId)
+    # Auto adds player if they can join, otherwise renders them as an
+    # observer
+    @_setGame(game)
+    return { game: game.renderPlayer(@) }
+
+
+  newId: async (data, callback) ->
+    console.log "newId"
+    creds =
+        success: true
+        id: uuid.next()
+        auth: uuid.next()
+    authKey = @_getAuthKey(creds.id)
+    await redis.del authKey
+    await redis.hset authKey, "auth", creds.auth
+    await redis.expire authKey, @class._USER_EXPIRE
+    @userId = creds.id
+    return creds
 
 
   _getAuthKey: (id) ->
@@ -93,5 +94,6 @@ class UserSocket uses Backbone.Events
 
   _setGame: (game) ->
     if @currentGame?
+      @trigger("leaveGame", @)
       @stopListening(@currentGame)
     @currentGame = game
