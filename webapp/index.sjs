@@ -9,7 +9,7 @@ require ./game/gameTable for GameTable
 require ./backboneHacks
 require ./socketHacks
 
-$ async noerror () ->
+$ async nocheck () ->
   """DOM has loaded; activate backbone routers and be happy!"""
   if typeof localStorage == "undefined"
     $('body').html("You must be using an HTML5-compliant browser with "
@@ -23,14 +23,14 @@ $ async noerror () ->
         id: localStorage.userId
         auth: localStorage.userAuth
     catch e
-      console.log(e)
+      console.trace(e)
       if e.error.indexOf("invalid") != 0
         throw e
       await data = app.socket.emitAsync "newId"
       localStorage.userId = data.id
       localStorage.userAuth = data.auth
   catch e
-    console.log e
+    console.trace e
     $('body').html("Initialization failed: #{ e and e.message or e }")
     throw e
 

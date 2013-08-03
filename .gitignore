@@ -1,4 +1,4 @@
 dump.rdb
 node_modules
 /webapp/_requirejs
-/webapp.build*
+/build.*

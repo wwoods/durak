@@ -13,8 +13,8 @@ class UserSocket uses Backbone.Events
     @userId = null
 
     bind = (event, method) ->
-      realMethod = async (data, callback) ->
-        await r = method(data, callback)
+      realMethod = async nocheck (data, callback) ->
+        await r = @[event](data, callback)
         catch e
           if e.error?
             # Expected, or at least processed; don't need a trace.  Send
@@ -27,18 +27,18 @@ class UserSocket uses Backbone.Events
 
     for key in [ 'auth', 'createGame', 'disconnect', 'loadGame', 'newId' ]
       async
-        bind(key, -> @[key].apply(@, arguments))
+        bind(key)
         console.log "Bound #{ key }"
 
 
   auth: async (auth, callback) ->
     console.log "auth"
     authKey = @_getAuthKey(auth.id)
-    await r = redis.hget authKey, "auth"
+    await nocheck r = redis.hget authKey, "auth"
     catch e
       # Is it a connectivity issue?  If so, this will raise a different
       # exception.
-      await redis.get "_"
+      await nocheck redis.get "_"
       # Otherwise, raise an invalid auth
       throw { error: "invalid" }
 
@@ -46,7 +46,7 @@ class UserSocket uses Backbone.Events
       throw { error: "invalid" }
 
     @userId = auth.id
-    await redis.expire(authKey, @class._USER_EXPIRE)
+    await nocheck redis.expire(authKey, @class._USER_EXPIRE)
     return { success: true }
 
 
@@ -87,9 +87,9 @@ class UserSocket uses Backbone.Events
         id: uuid.next()
         auth: uuid.next()
     authKey = @_getAuthKey(creds.id)
-    await redis.del authKey
-    await redis.hset authKey, "auth", creds.auth
-    await redis.expire authKey, @class._USER_EXPIRE
+    await nocheck redis.del authKey
+    await nocheck redis.hset authKey, "auth", creds.auth
+    await nocheck redis.expire authKey, @class._USER_EXPIRE
     @userId = creds.id
     return creds
 

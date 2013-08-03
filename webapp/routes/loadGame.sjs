@@ -2,7 +2,7 @@
 require ../app
 require ../game/gameTable for GameTable
 
-action = async (gameId) ->
+action = async noerror (gameId) ->
   console.log "Loading game #{ gameId }"
   await r = app.socket.emitAsync 'loadGame', gameId: gameId
   catch e

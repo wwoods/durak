@@ -21,7 +21,7 @@ class DurakGame uses Backbone.Events
 
     game = new DurakGame()
     game.gameId = gameId
-    await data = redis.get game._getKey()
+    await nocheck data = redis.get game._getKey()
     if not data?
       throw { error: "invalid gameId: #{ gameId }" }
     game.data = JSON.parse(data)
@@ -80,8 +80,8 @@ class DurakGame uses Backbone.Events
       @gameId = uuid.next()
       @openGames[@gameId] = @
       console.log "Game #{ @gameId } loaded"
-    await redis.set @_getKey(), JSON.stringify(@data)
-    await redis.expire @_getKey(), @class._EXPIRE_TIME
+    await nocheck redis.set @_getKey(), JSON.stringify(@data)
+    await nocheck redis.expire @_getKey(), @class._EXPIRE_TIME
 
 
   start: async () ->

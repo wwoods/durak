@@ -10,7 +10,7 @@ class GameTable extends Backbone.View
 
   initialize: () ->
     playingCards.card.defaults =
-        imgPrefix: "src/lib/jsPlayingCards/"
+        imgPrefix: "src/shim/jsPlayingCards/"
     @render()
 
 
