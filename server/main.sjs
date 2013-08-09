@@ -3,7 +3,7 @@ require http
 require ./routes
 require ./websocket
 
-run = async (app) ->
+run = async nocheck nocascade (app) ->
   routes.populate(app)
   server = http.createServer(app)
   websocket.listen(server)

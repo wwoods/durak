@@ -4,16 +4,14 @@ require backbone as Backbone
 require ../common/redis
 require ../common/uuid
 
+require ../../shared/constants for GameConstants
+
 class DurakGame uses Backbone.Events
   _EXPIRE_TIME: 7 * 24 * 60 * 60
 
   @openGames: {}
 
-
-  @states:
-      INITIAL: 1
-      PLAYING: 2
-
+  @states: GameConstants.states
 
   @load: async (gameId) ->
     if gameId of @openGames

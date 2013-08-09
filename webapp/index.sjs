@@ -1,7 +1,4 @@
 
-require shared/models for ColorHolder
-require ./views for ColorView
-
 require ./app
 require ./routes/index
 require ./game/gameTable for GameTable
@@ -9,7 +6,7 @@ require ./game/gameTable for GameTable
 require ./backboneHacks
 require ./socketHacks
 
-$ async nocheck () ->
+$ async noerror () ->
   """DOM has loaded; activate backbone routers and be happy!"""
   if typeof localStorage == "undefined"
     $('body').html("You must be using an HTML5-compliant browser with "
@@ -23,8 +20,8 @@ $ async nocheck () ->
         id: localStorage.userId
         auth: localStorage.userAuth
     catch e
-      console.trace(e)
-      if e.error.indexOf("invalid") != 0
+      console.log(e)
+      if not e.error or e.error.indexOf("invalid") != 0
         throw e
       await data = app.socket.emitAsync "newId"
       localStorage.userId = data.id
