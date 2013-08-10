@@ -7,7 +7,7 @@ class Card extends Backbone.Model
     suit = rankSuit[1]
     if rank == "T"
       rank = "10"
-    return new Card(rank, suit)
+    return new Card({ rank, suit })
 
 
   defaults:

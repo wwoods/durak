@@ -70,7 +70,7 @@ class DurakGame uses Backbone.Events
         state.hands.push(h.length)
       else
         state.hands.push(h)
-    return { gameId: @gameId, gameData: state }
+    return { gameId: @gameId, state: state }
 
 
   save: async () ->

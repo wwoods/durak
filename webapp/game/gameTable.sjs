@@ -11,10 +11,9 @@ class GameTable extends Backbone.View
 
   @states: GameConstants.states
 
-  initialize: (gameData) ->
+  initialize: (@_gameData) ->
     playingCards.card.defaults =
         imgPrefix: "src/shim/jsPlayingCards/"
-    @_gameData = gameData
     @render()
 
 
@@ -25,8 +24,11 @@ class GameTable extends Backbone.View
       return
 
     @playerId = @_gameData.state.playerId
+    el.empty()
 
     cards = @_gameData.state.hands[@playerId]
+    if not cards?
+      return
     @spread = new Spread()
     for c in cards
       @spread.add(Card.fromServer(c))
