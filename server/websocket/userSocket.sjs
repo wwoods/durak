@@ -13,7 +13,7 @@ class UserSocket uses Backbone.Events
     @userId = null
 
     bind = (event, method) ->
-      realMethod = async nocheck (data, callback) ->
+      realMethod = async extern (data, callback) ->
         await r = @[event](data, callback)
         catch e
           if e.error?
@@ -34,11 +34,11 @@ class UserSocket uses Backbone.Events
   auth: async (auth, callback) ->
     console.log "auth"
     authKey = @_getAuthKey(auth.id)
-    await nocheck r = redis.hget authKey, "auth"
+    await extern r = redis.hget authKey, "auth"
     catch e
       # Is it a connectivity issue?  If so, this will raise a different
       # exception.
-      await nocheck redis.get "_"
+      await extern redis.get "_"
       # Otherwise, raise an invalid auth
       throw { error: "invalid" }
 
@@ -46,7 +46,7 @@ class UserSocket uses Backbone.Events
       throw { error: "invalid" }
 
     @userId = auth.id
-    await nocheck redis.expire(authKey, @class._USER_EXPIRE)
+    await extern redis.expire(authKey, @class._USER_EXPIRE)
     return { success: true }
 
 
@@ -87,9 +87,9 @@ class UserSocket uses Backbone.Events
         id: uuid.next()
         auth: uuid.next()
     authKey = @_getAuthKey(creds.id)
-    await nocheck redis.del authKey
-    await nocheck redis.hset authKey, "auth", creds.auth
-    await nocheck redis.expire authKey, @class._USER_EXPIRE
+    await extern redis.del authKey
+    await extern redis.hset authKey, "auth", creds.auth
+    await extern redis.expire authKey, @class._USER_EXPIRE
     @userId = creds.id
     return creds
 

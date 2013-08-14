@@ -1,12 +1,9 @@
 
 require http
-require ./routes
 require ./websocket
 
-run = async nocheck nocascade (app) ->
-  routes.populate(app)
+run = async extern nocascade (app) ->
   server = http.createServer(app)
   websocket.listen(server)
 
-  await nocheck server.listen app.get('port')
-  console.log('Express / socket server listening on port ' + app.get('port'))
+  await extern server.listen app.get('port')

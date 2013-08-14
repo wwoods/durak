@@ -39,3 +39,4 @@ async
       title: 'Durak'
 
   await main.run(app)
+  console.log "Durak server ready port #{ app.get('port') }"
